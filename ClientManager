@@ -1,0 +1,67 @@
+//Miguel Mendoza
+//12 - 9 - 25
+//Final Programming Project
+//Business organizer
+
+
+package businessOrganizer;
+
+import java.util.LinkedList;
+import java.io.*;
+
+public class ClientManager {
+
+    private LinkedList<Client> clients;
+    private final String CLIENTS_FILE = "clients.txt";
+
+    public ClientManager() {
+        clients = new LinkedList<>();
+        loadClients();
+    }
+
+    public void addClient(Client client) {
+        clients.add(client);
+        saveClients();
+        System.out.println("Client added successfully!\n");
+    }
+
+    public void viewClients() {
+        if (clients.isEmpty()) {
+            System.out.println("No clients found.\n");
+            return;
+        }
+
+        System.out.println("----- Your Clients -----");
+        for (int i = 0; i < clients.size(); i++) {
+            System.out.println("Client #" + (i + 1));
+            System.out.println(clients.get(i));
+            System.out.println("-----------------------");
+        }
+    }
+
+    private void saveClients() {
+        try (PrintWriter writer = new PrintWriter(new FileWriter(CLIENTS_FILE))) {
+            for (Client c : clients) {
+                writer.println(c.getName() + ";" + c.getEmail() + ";" + c.getPhone());
+            }
+        } catch (IOException e) {
+            System.out.println("Error saving clients: " + e.getMessage());
+        }
+    }
+
+    private void loadClients() {
+        try (BufferedReader reader = new BufferedReader(new FileReader(CLIENTS_FILE))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(";", 3);
+                if (parts.length == 3) {
+                    clients.add(new Client(parts[0], parts[1], parts[2]));
+                }
+            }
+        } catch (FileNotFoundException e) {
+            // File doesn't exist yet, that's fine
+        } catch (IOException e) {
+            System.out.println("Error loading clients: " + e.getMessage());
+        }
+    }
+}

@@ -1,0 +1,46 @@
+//Miguel Mendoza
+//12 - 9 - 25
+//Final Programming Project
+//Business organizer
+
+package businessOrganizer;
+
+import java.time.LocalDate;
+
+public class Event {
+	private String title;
+	private String date;
+	private String description;
+
+	public Event(String title, String date, String description) {
+		this.title = title;
+		this.date = date;
+		this.description = description;
+	}
+	
+	public String getTitle() {
+		return title;
+	}
+	
+	public String getDate() {
+		return date;
+	}
+	
+	public String getDescription() {
+		return description;
+	}
+	
+	public LocalDate getDateAsLocalDate() {
+		return LocalDate.parse(date);
+	}
+	
+	@Override
+	public String toString() {
+		return "Title: " + title +
+				"\nDate: " + date +
+				"\nDescription: " + description;
+	}
+	
+	
+
+}

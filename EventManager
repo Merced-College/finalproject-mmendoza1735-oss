@@ -1,0 +1,195 @@
+//Miguel Mendoza
+//12 - 9 - 25
+//Final Programming Project
+//Business organizer
+
+package businessOrganizer;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedList;
+import java.util.Stack;
+import java.io.*;
+import java.util.Queue;
+
+
+public class EventManager {
+	
+	private final String REMINDERS_FILE = "reminders.txt";
+
+    private LinkedList<Event> events;
+    //Stack to store deleted events
+    private Stack<Event> deletedEvents; 
+    
+    private Queue<String> remindersQueue = new LinkedList<>();
+
+    public EventManager() {
+        events = new LinkedList<>();
+        deletedEvents = new Stack<>();
+
+        // Load events from file
+        loadEvents();
+
+        // Rebuild reminders queue based on loaded events
+        remindersQueue = new LinkedList<>();
+        for (Event e : events) {
+            remindersQueue.add("Reminder: " + e.getTitle() + " on " + e.getDate());
+        }
+        
+        //Save rebuilt reminders to file so they persist
+        saveReminders();
+
+    }
+
+
+    public void addEvent(Event event) {
+        events.add(event);
+        remindersQueue.add("Reminder: " + event.getTitle() + " on " + event.getDate());
+        saveEvents();
+        saveReminders();
+        System.out.println("Event added successfully!\n");
+        
+    }
+    
+    public void showNextReminder() {
+        if (remindersQueue.isEmpty()) {
+            System.out.println("No reminders in the queue.\n");
+            return;
+        }
+        String reminder = remindersQueue.poll(); // removes from queue
+        System.out.println(reminder + "\n");
+    }
+    
+    public void saveReminders() {
+        try (PrintWriter writer = new PrintWriter(new FileWriter(REMINDERS_FILE))) {
+            for (String reminder : remindersQueue) {
+                writer.println(reminder);
+            }
+        } catch (IOException e) {
+            System.out.println("Error saving reminders: " + e.getMessage());
+        }
+    }
+
+    private void loadReminders() {
+        try (BufferedReader reader = new BufferedReader(new FileReader(REMINDERS_FILE))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                remindersQueue.add(line);
+            }
+        } catch (FileNotFoundException e) {
+            // File doesn't exist yet, that's fine
+        } catch (IOException e) {
+            System.out.println("Error loading reminders: " + e.getMessage());
+        }
+    }
+
+
+
+    public void viewEvents() {
+        if (events.isEmpty()) {
+            System.out.println("No events found.\n");
+            return;
+        }
+
+        System.out.println("----- Your Events -----");
+        for (int i = 0; i < events.size(); i++) {
+            System.out.println("Event #" + (i + 1));
+            System.out.println(events.get(i));
+            System.out.println("-----------------------");
+        }
+    }
+
+    public void deleteEvent(int index) {
+        if (index < 0 || index >= events.size()) {
+            System.out.println("Invalid event number.\n");
+            return;
+        }
+
+        Event removed = events.remove(index);
+        deletedEvents.push(removed);
+        
+        //Remove corresponding reminder
+        remindersQueue.removeIf(r -> r.contains(removed.getTitle()) && r.contains(removed.getDate()));
+        
+        System.out.println("Event deleted successfully!\n");
+        //save after deleting
+        saveEvents();
+        saveReminders();
+    }
+    public void undoDelete() {
+        if (deletedEvents.isEmpty()) {
+            System.out.println("No deleted events to undo.\n");
+            return;
+        }
+
+        Event restored = deletedEvents.pop();
+        events.add(restored);
+        
+        remindersQueue.add("Reminder: " + restored.getTitle() + " on " + restored.getDate());
+        
+        System.out.println("Last deleted event restored!\n");
+        saveEvents();
+        saveReminders();
+    }
+    
+    private void saveEvents() {
+        try (PrintWriter writer = new PrintWriter(new FileWriter("events.txt"))) {
+            for (Event e : events) {
+                writer.println(e.getTitle() + ";" + e.getDate() + ";" + e.getDescription());
+            }
+        } catch (IOException e) {
+            System.out.println("Error saving events: " + e.getMessage());
+        }
+    }
+
+    // Load events from a file
+    private void loadEvents() {
+        try (BufferedReader reader = new BufferedReader(new FileReader("events.txt"))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(";", 3);
+                if (parts.length == 3) {
+                    events.add(new Event(parts[0], parts[1], parts[2]));
+                }
+            }
+        } catch (FileNotFoundException e) {
+            // File doesn't exist yet, that's fine
+        } catch (IOException e) {
+            System.out.println("Error loading events: " + e.getMessage());
+        }
+    }
+    
+    //Recursive method to search events by date
+    public void searchEventsByDate(String date) {
+    	System.out.println("Searching for events on: " + date);
+    	searchRecursive(date, 0);
+    }
+    //Helper recursive function
+    private void searchRecursive(String date, int index) {
+        if (index >= events.size()) {
+            // Base case: reached end of list
+            return;
+        }
+        
+        Event current = events.get(index);
+        if (current.getDate().equals(date)) {
+        	System.out.println("Event #" + (index + 1));
+        	System.out.println(current);
+        	System.out.println("-----------------------");
+        }
+        
+        searchRecursive(date, index + 1);
+    }
+    
+    public void sortEventsByDate() {
+    	if (events.isEmpty()){
+    		System.out.println("No events to sort.");
+    		return;
+    	}
+    	Collections.sort(events, Comparator.comparing(Event::getDateAsLocalDate));
+    	
+    	System.out.println("Events sorted by date!");
+    	viewEvents();
+    }
+    
+
+}

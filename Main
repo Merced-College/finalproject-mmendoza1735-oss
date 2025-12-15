@@ -1,0 +1,79 @@
+//Miguel Mendoza
+//12 - 9 - 25
+//Final Programming Project
+//Business organizer
+
+package businessOrganizer;
+import java.util.Scanner;
+
+public class Main {
+
+	public static void main(String[] args) {
+		Scanner input = new Scanner(System.in);
+        EventManager manager = new EventManager();
+
+        while (true) {
+            System.out.println("------ AGENDA APP ------");
+            System.out.println("1. Add Event");
+            System.out.println("2. View Events");
+            System.out.println("3. Delete Event");
+            System.out.println("4. Exit");
+            System.out.println("5. Undo Last Delete");
+            System.out.println("6. Search Events by Date");
+            System.out.println("7. Show Next Reminder");
+            System.out.print("Choose an option: ");
+
+            int choice = input.nextInt();
+            input.nextLine(); // Clear the leftover newline
+
+            switch (choice) {
+                case 1:
+                    System.out.print("Enter event title: ");
+                    String title = input.nextLine();
+
+                    System.out.print("Enter date (YYYY-MM-DD): ");
+                    String date = input.nextLine();
+
+                    System.out.print("Enter description: ");
+                    String description = input.nextLine();
+
+                    Event newEvent = new Event(title, date, description);
+                    manager.addEvent(newEvent);
+                    break;
+
+                case 2:
+                    manager.viewEvents();
+                    break;
+
+                case 3:
+                    System.out.print("Enter event number to delete: ");
+                    int index = input.nextInt() - 1;
+                    manager.deleteEvent(index);
+                    break;
+
+                case 4:
+                    System.out.println("Exiting program...");
+                    manager.saveReminders();
+                    input.close();
+                    return;
+                    
+                case 5:
+                	manager.undoDelete();
+                	break;
+                case 6:
+                	System.out.print("Enter date to search (YYYY-MM-DD): ");
+                    String searchDate = input.nextLine();
+                    manager.searchEventsByDate(searchDate);
+                    break;
+                case 7:
+                	manager.showNextReminder();
+                	break;
+
+                default:
+                    System.out.println("Invalid option.\n");
+            }
+        }
+
+	}
+
+}
